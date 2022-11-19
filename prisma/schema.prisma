@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model cart {
+  id        Int         @id @default(autoincrement())
+  user_id   Int
+  user      user        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cart_item cart_item[]
+}
+
+model cart_item {
+  id         Int     @default(autoincrement())
+  cart_id    Int
+  product_id Int
+  quantity   Int
+  cart       cart    @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product    product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([cart_id, product_id])
+}
+
+model order_line {
+  id              Int         @id @default(autoincrement())
+  order_id        Int?
+  product_item_id Int?
+  quantity        Int
+  price           Float
+  shop_order      shop_order? @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product         product?    @relation(fields: [product_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model order_status {
+  id         Int          @id @default(autoincrement())
+  status     String
+  shop_order shop_order[]
+}
+
+model payment_type {
+  id           Int            @id @default(autoincrement())
+  type         String?
+  user_payment user_payment[]
+}
+
+model product {
+  id                Int                @id @default(autoincrement())
+  name              String
+  description       String
+  price             Float
+  images            String?
+  inventory_id      Int?
+  category_id       Int?
+  discount_id       Int?
+  product_category  product_category?  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_discount  product_discount?  @relation(fields: [discount_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_inventory product_inventory? @relation(fields: [inventory_id], references: [id], onUpdate: NoAction)
+  cart_item         cart_item[]
+  order_line        order_line[]
+  review            review[]
+}
+
+model product_category {
+  id      Int       @id @default(autoincrement())
+  name    String
+  product product[]
+}
+
+model product_discount {
+  id          Int       @id @default(autoincrement())
+  name        String?
+  description String?
+  percentage  Float
+  active      Boolean?
+  product     product[]
+}
+
+model product_inventory {
+  id       Int       @id @default(autoincrement())
+  quantity Int
+  product  product[]
+}
+
+model review {
+  id         Int     @default(autoincrement())
+  user_id    Int
+  product_id Int
+  rating     Int
+  comment    String?
+  product    product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       user    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([user_id, product_id])
+}
+
+model shop_order {
+  id                                    Int           @id @default(autoincrement())
+  user_id                               Int?
+  order_date                            DateTime      @db.Date
+  payment_id                            Int?
+  shipping_address_id                   Int?
+  total                                 Float
+  order_status                          Int?
+  order_status_order_statusToshop_order order_status? @relation(fields: [order_status], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_payment                          user_payment? @relation(fields: [payment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_address                          user_address? @relation(fields: [shipping_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                                  user?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  order_line                            order_line[]
+}
+
+model user {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  email        String         @unique
+  password     String
+  firstname    String
+  lastname     String
+  phone        String         @unique
+  is_admin     Boolean
+  cart         cart[]
+  review       review[]
+  shop_order   shop_order[]
+  user_address user_address[]
+  user_payment user_payment[]
+}
+
+model user_address {
+  id           Int          @id @default(autoincrement())
+  user_id      Int?
+  adress_line1 String
+  adress_line2 String?
+  city         String
+  postal_code  String?
+  country      String
+  user         user?        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shop_order   shop_order[]
+}
+
+model user_payment {
+  id                                      Int          @id @default(autoincrement())
+  user_id                                 Int?
+  payment_type                            Int
+  provider                                String?
+  account_number                          String?
+  expiry_date                             String?      @db.VarChar(5)
+  payment_type_payment_typeTouser_payment payment_type @relation(fields: [payment_type], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                                    user?        @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shop_order                              shop_order[]
+}
