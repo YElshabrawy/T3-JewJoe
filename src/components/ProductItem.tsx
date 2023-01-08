@@ -1,4 +1,4 @@
-import { product } from "@prisma/client";
+import type { product } from "@prisma/client";
 import Image from "next/image";
 
 const ASSETS_DIR = "/assets/products";
