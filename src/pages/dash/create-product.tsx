@@ -1,20 +1,59 @@
+import { stat } from "fs";
+import Image from "next/image";
 import React, { useReducer, useState } from "react";
 import { TypeOf } from "zod";
 
 const CreateProduct = () => {
   // Image Upload
-  const [file, setFile] = useState<File | undefined>(undefined);
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // const file = e.target.files?.[0];
-    setFile(e.target.files?.[0]);
-  };
-  const uploadImage = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
-    if (!file) return;
-    console.log("hhhh");
-  };
+  const [imageSrc, setImageSrc] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  function handleImageChange(changeEvent: React.ChangeEvent<HTMLInputElement>) {
+    // Used to show image in UI
+    const reader = new FileReader();
+    reader.onload = function (onLoadEvent) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      setImageSrc(onLoadEvent.target.result);
+      // setUploadData(undefined);
+    };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    reader?.readAsDataURL(changeEvent.target.files[0]);
+  }
+
+  async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    console.log(state);
+    const form = event.currentTarget;
+
+    const fileInput = Array.from(form.elements).find(
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      ({ name }) => name === "image"
+    );
+
+    const formData = new FormData();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    for (const file of fileInput?.files) {
+      formData.append("file", file);
+    }
+
+    formData.append("upload_preset", "my-uploads");
+    setIsLoading(true);
+    const data = await fetch(
+      "https://api.cloudinary.com/v1_1/dalrurr2j/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    ).then((r) => r.json());
+    setIsLoading(false);
+    state.image = data.secure_url;
+    console.log(state);
+  }
+
   // Form
   const initialForm = {
     name: "",
@@ -41,50 +80,69 @@ const CreateProduct = () => {
 
   return (
     <div>
-      <div className="mx-auto flex w-1/5 flex-col space-y-4">
+      <div className="mx-auto flex w-2/5 flex-col space-y-4">
         <h1>Create Product</h1>
-        <input
-          className="rounded-md border-2 border-black px-1 py-1"
-          type="text"
-          name="name"
-          placeholder="Product Name"
-          onChange={handleChange}
-        />
-        <input
-          className="rounded-md border-2 border-black px-1 py-1"
-          type="text"
-          name="description"
-          placeholder="Product Description"
-          onChange={handleChange}
-        />
-        <input
-          className="rounded-md border-2 border-black px-1 py-1"
-          type="number"
-          step={0.01}
-          name="price"
-          placeholder="Price"
-          onChange={handleChange}
-        />
-        <input
-          className="rounded-md border-2 border-black px-1 py-1"
-          type="number"
-          name="quantity"
-          placeholder="Quantity"
-          onChange={handleChange}
-        />
-        <input
-          type="file"
-          name="image"
-          id="image"
-          accept="image/png, image/jpeg, image/jpg"
-          onChange={handleFileChange}
-        />
-        <button className="white-btn" onClick={() => console.log(state)}>
-          Click me
-        </button>
-        <button className="white-btn" onClick={uploadImage}>
-          Upload Image
-        </button>
+        {isLoading ? (
+          <p>Loading ...</p>
+        ) : (
+          <form
+            className="mx-auto flex flex-col space-y-4"
+            onSubmit={handleFormSubmit}
+            action=""
+          >
+            <input
+              className="rounded-md border-2 border-black px-1 py-1"
+              type="text"
+              name="name"
+              placeholder="Product Name"
+              onChange={handleChange}
+              required
+            />
+            <input
+              className="rounded-md border-2 border-black px-1 py-1"
+              type="text"
+              name="description"
+              placeholder="Product Description"
+              onChange={handleChange}
+            />
+            <input
+              className="rounded-md border-2 border-black px-1 py-1"
+              type="number"
+              step={0.01}
+              name="price"
+              placeholder="Price"
+              required
+              onChange={handleChange}
+            />
+            <input
+              className="rounded-md border-2 border-black px-1 py-1"
+              type="number"
+              name="quantity"
+              placeholder="Quantity"
+              required
+              onChange={handleChange}
+            />
+            <input
+              type="file"
+              name="image"
+              id="image"
+              accept="image/png, image/jpeg, image/jpg"
+              onChange={handleImageChange}
+            />
+            {imageSrc != "" && (
+              <Image
+                alt="Product image"
+                src={imageSrc}
+                width="300"
+                height="300"
+              />
+            )}
+
+            <button className="white-btn" type="submit">
+              Create a Product
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
