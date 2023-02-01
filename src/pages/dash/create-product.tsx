@@ -1,6 +1,13 @@
 import Image from "next/image";
 import React, { useReducer, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { v4 as uuidV4 } from "uuid";
+import { env } from "../../env/client.mjs";
 
+const supabase = createClient(
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+);
 const CreateProduct = () => {
   // Image Upload
   const [imageSrc, setImageSrc] = useState("");
@@ -25,6 +32,25 @@ const CreateProduct = () => {
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     console.log(state);
+    // Upload pic to supabase
+    if (state.image) {
+      setIsLoading(true);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(uuidV4(), state.image);
+      setIsLoading(false);
+      if (data) {
+        const imgURL =
+          env.NEXT_PUBLIC_SUPABASE_URL +
+          "/storage/v1/object/public/images/" +
+          data.path;
+        console.log("imgURL", imgURL);
+        // upload to db later
+      } else {
+        console.log(error);
+      }
+    }
+    // Upload entery to database
   }
 
   // Form
@@ -111,6 +137,7 @@ const CreateProduct = () => {
                 src={imageSrc}
                 width="300"
                 height="300"
+                className="h-auto w-auto"
               />
             )}
 
