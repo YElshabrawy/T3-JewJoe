@@ -1,56 +1,24 @@
-import { stat } from "fs";
 import Image from "next/image";
 import React, { useReducer, useState } from "react";
-import { TypeOf } from "zod";
 
 const CreateProduct = () => {
   // Image Upload
   const [imageSrc, setImageSrc] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  function handleImageChange(changeEvent: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Used to show image in UI
     const reader = new FileReader();
     reader.onload = function (onLoadEvent) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      setImageSrc(onLoadEvent.target.result);
-      // setUploadData(undefined);
+      if (onLoadEvent.target) setImageSrc(onLoadEvent.target.result as string);
     };
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    reader?.readAsDataURL(changeEvent.target.files[0]);
+    if (e.target.files && e.target.files[0])
+      reader?.readAsDataURL(e.target.files[0] as File);
+    else setImageSrc("");
   }
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log(state);
-    const form = event.currentTarget;
-
-    const fileInput = Array.from(form.elements).find(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      ({ name }) => name === "image"
-    );
-
-    const formData = new FormData();
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    for (const file of fileInput?.files) {
-      formData.append("file", file);
-    }
-
-    formData.append("upload_preset", "my-uploads");
-    setIsLoading(true);
-    const data = await fetch(
-      "https://api.cloudinary.com/v1_1/dalrurr2j/image/upload",
-      {
-        method: "POST",
-        body: formData,
-      }
-    ).then((r) => r.json());
-    setIsLoading(false);
-    state.image = data.secure_url;
     console.log(state);
   }
 
@@ -62,6 +30,7 @@ const CreateProduct = () => {
     quantity: 0,
     image: "",
   };
+
   function formReducer(
     state: typeof initialForm,
     action: { input: string; value: string | number }
@@ -96,7 +65,7 @@ const CreateProduct = () => {
               name="name"
               placeholder="Product Name"
               onChange={handleChange}
-              required
+              // required
             />
             <input
               className="rounded-md border-2 border-black px-1 py-1"
@@ -111,7 +80,7 @@ const CreateProduct = () => {
               step={0.01}
               name="price"
               placeholder="Price"
-              required
+              // required
               onChange={handleChange}
             />
             <input
@@ -119,7 +88,7 @@ const CreateProduct = () => {
               type="number"
               name="quantity"
               placeholder="Quantity"
-              required
+              // required
               onChange={handleChange}
             />
             <input
