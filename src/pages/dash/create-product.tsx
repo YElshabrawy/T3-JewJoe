@@ -8,13 +8,18 @@ const CreateProduct = () => {
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Used to show image in UI
+    if (!e.target.files || !e.target.files[0]) {
+      setImageSrc("");
+      dispatch({ input: "image", value: undefined });
+      return;
+    }
+    const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = function (onLoadEvent) {
       if (onLoadEvent.target) setImageSrc(onLoadEvent.target.result as string);
     };
-    if (e.target.files && e.target.files[0])
-      reader?.readAsDataURL(e.target.files[0] as File);
-    else setImageSrc("");
+    reader?.readAsDataURL(file as File);
+    dispatch({ input: "image", value: file as File });
   }
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -28,16 +33,18 @@ const CreateProduct = () => {
     description: "",
     price: 0,
     quantity: 0,
-    image: "",
+    image: undefined as unknown as File,
   };
+
+  // Control Form Inputs
+  const [state, dispatch] = useReducer(formReducer, initialForm);
 
   function formReducer(
     state: typeof initialForm,
-    action: { input: string; value: string | number }
+    action: { input: string; value: string | number | File | undefined }
   ) {
     return { ...state, [action.input]: action.value };
   }
-  const [state, dispatch] = useReducer(formReducer, initialForm);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const action = {
