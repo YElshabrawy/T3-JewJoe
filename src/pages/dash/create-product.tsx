@@ -97,7 +97,7 @@ const CreateProduct = () => {
     const action: { input: string; value: string | number | File | undefined } =
       {
         input: e.target.name,
-        value: isNumber ? parseInt(e.target.value) : e.target.value,
+        value: isNumber ? parseFloat(e.target.value) : e.target.value,
       };
     dispatch(action);
   }
