@@ -3,6 +3,7 @@ import React, { useReducer, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidV4 } from "uuid";
 import { env } from "../../env/client.mjs";
+import { trpc } from "../../utils/trpc";
 
 const supabase = createClient(
   env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,6 +13,7 @@ const CreateProduct = () => {
   // Image Upload
   const [imageSrc, setImageSrc] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const createProductMutation = trpc.product.createProduct.useMutation();
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Used to show image in UI
@@ -28,7 +30,17 @@ const CreateProduct = () => {
     reader?.readAsDataURL(file as File);
     dispatch({ input: "image", value: file as File });
   }
-
+  const pushToDatabase = async (imgURL: string) => {
+    const { description, name, price, quantity } = state;
+    const result = await createProductMutation.mutateAsync({
+      name,
+      price,
+      description,
+      quantity,
+      image: imgURL,
+    });
+    console.log("res", result);
+  };
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     console.log(state);
@@ -45,21 +57,27 @@ const CreateProduct = () => {
           "/storage/v1/object/public/images/" +
           data.path;
         console.log("imgURL", imgURL);
-        // upload to db later
+        pushToDatabase(imgURL);
       } else {
         console.log(error);
       }
-    }
-    // Upload entery to database
+    } else pushToDatabase("");
   }
 
   // Form
-  const initialForm = {
+  type ProductForm = {
+    name: string;
+    description: string;
+    price: number;
+    quantity: number;
+    image?: File;
+  };
+  const initialForm: ProductForm = {
     name: "",
     description: "",
     price: 0,
     quantity: 0,
-    image: undefined as unknown as File,
+    image: undefined,
   };
 
   // Control Form Inputs
@@ -72,11 +90,15 @@ const CreateProduct = () => {
     return { ...state, [action.input]: action.value };
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const action = {
-      input: e.target.name,
-      value: e.target.value,
-    };
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+    isNumber = false
+  ) {
+    const action: { input: string; value: string | number | File | undefined } =
+      {
+        input: e.target.name,
+        value: isNumber ? parseInt(e.target.value) : e.target.value,
+      };
     dispatch(action);
   }
 
@@ -114,7 +136,7 @@ const CreateProduct = () => {
               name="price"
               placeholder="Price"
               // required
-              onChange={handleChange}
+              onChange={(e) => handleChange(e, true)}
             />
             <input
               className="rounded-md border-2 border-black px-1 py-1"
@@ -122,7 +144,7 @@ const CreateProduct = () => {
               name="quantity"
               placeholder="Quantity"
               // required
-              onChange={handleChange}
+              onChange={(e) => handleChange(e, true)}
             />
             <input
               type="file"
