@@ -9,18 +9,24 @@ import ProfileIcon from "./Icons/ProfileIcon";
 import Image from "next/image";
 // Static images
 import IMG_LOGO from "../assets/svg/logo.svg";
+import Link from "next/link";
 
 const NavBar = ({ withoutSearch = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navItems = ["Shop", "Blog", "Our Story"].map((item, i) => {
+  const navItems = [
+    { name: "Shop", href: "/products" },
+    { name: "Blog", href: "/" },
+    { name: "Our Story", href: "/" },
+  ].map((item, i) => {
     return (
-      <h5
-        className="text-h4 hover:text-main md:text-h5 mb-4 cursor-pointer md:mr-16 md:mb-0"
+      <Link
+        href={item.href}
+        className="mb-4 cursor-pointer text-h4 hover:text-main md:mr-16 md:mb-0 md:text-h5"
         key={i}
       >
-        {item}
-      </h5>
+        {item.name}
+      </Link>
     );
   });
   return (

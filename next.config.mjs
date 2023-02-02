@@ -13,5 +13,8 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    domains: ["rxgedyrhydspneiuelok.supabase.co"],
+  },
 };
 export default config;
