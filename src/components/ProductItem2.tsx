@@ -6,16 +6,19 @@ const ASSETS_DIR = "/assets/products";
 const ProductItem = ({ product }: { product: product }) => {
   const [isLoading, setLoading] = useState(true);
   return (
-    <div className="group cursor-pointer">
-      <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
+    <div className="group">
+      <div className="aspect-w-1 aspect-h-1 w-full cursor-pointer overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
         <Image
-          alt=""
+          alt={product.name}
           src={
             product.image?.startsWith("http")
               ? product.image
               : `${ASSETS_DIR}/${product.image}.png`
           }
           fill
+          sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
+              33vw"
           style={{ objectFit: "cover" }}
           className={cn(
             "duration-700 ease-in-out group-hover:opacity-40",
@@ -26,8 +29,8 @@ const ProductItem = ({ product }: { product: product }) => {
           onLoadingComplete={() => setLoading(false)}
         />
       </div>
-      <h3>{product.name}</h3>{" "}
-      <p className="text-Bs text-[14px] text-main">
+      <h3 className="w-fit cursor-pointer">{product.name}</h3>{" "}
+      <p className="w-fit cursor-pointer text-Bs text-[14px] text-main">
         $ {product.price.toFixed(2)}{" "}
       </p>
     </div>

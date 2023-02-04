@@ -10,19 +10,27 @@ import Image from "next/image";
 // Static images
 import IMG_LOGO from "../assets/svg/logo.svg";
 import Link from "next/link";
+import { useRouter } from "next/router";
+// Utils
+import cn from "../utils/cn";
 
 const NavBar = ({ withoutSearch = false }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const currentPage = "/" + router.route.split("/")[1];
 
   const navItems = [
     { name: "Shop", href: "/products" },
-    { name: "Blog", href: "/" },
-    { name: "Our Story", href: "/" },
+    { name: "Blog", href: "/blog" },
+    { name: "Our Story", href: "/our-story" },
   ].map((item, i) => {
     return (
       <Link
         href={item.href}
-        className="mb-4 cursor-pointer text-h4 hover:text-main md:mr-16 md:mb-0 md:text-h5"
+        className={cn(
+          "mb-4 cursor-pointer text-h4 hover:text-main md:mr-16 md:mb-0 md:text-h5",
+          currentPage == item.href ? "md:font-bold" : ""
+        )}
         key={i}
       >
         {item.name}
@@ -34,7 +42,9 @@ const NavBar = ({ withoutSearch = false }) => {
       {/* Logo and icons */}
       <div className="flex items-center justify-between">
         {/* logo */}
-        <Image className="cursor-pointer" src={IMG_LOGO} alt="" />
+        <Link href="/">
+          <Image className="cursor-pointer" src={IMG_LOGO} alt="" />
+        </Link>
         {/* Right Hand Side */}
         <div className="-mr-2 flex items-center md:hidden">
           {/* Cart */}
@@ -66,7 +76,7 @@ const NavBar = ({ withoutSearch = false }) => {
         </div>
       </div>
       {/* Search Bar */}
-      {!withoutSearch ? <Search /> : null}
+      {!withoutSearch ? <Search className="md:hidden" /> : null}
     </nav>
   );
 };
