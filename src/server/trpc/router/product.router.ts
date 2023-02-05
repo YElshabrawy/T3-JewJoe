@@ -9,6 +9,15 @@ export const productRouter = router({
       console.log("error", error);
     }
   }),
+  getProductByID: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.product.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
   createProduct: publicProcedure
     .input(
       z.object({

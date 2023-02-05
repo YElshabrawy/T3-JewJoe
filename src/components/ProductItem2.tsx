@@ -1,12 +1,13 @@
 import type { product } from "@prisma/client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 const ASSETS_DIR = "/assets/products";
 const ProductItem = ({ product }: { product: product }) => {
   const [isLoading, setLoading] = useState(true);
   return (
-    <div className="group">
+    <Link href={`/products/${product.id}`} className="group">
       <div className="aspect-w-1 aspect-h-1 w-full cursor-pointer overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
         <Image
           alt={product.name}
@@ -33,7 +34,7 @@ const ProductItem = ({ product }: { product: product }) => {
       <p className="w-fit cursor-pointer text-Bs text-[14px] text-main">
         $ {product.price.toFixed(2)}{" "}
       </p>
-    </div>
+    </Link>
     // <div className="">
     //   <button className="relative h-[136px] w-[136px] max-w-[162px] md:h-[380px] md:min-w-[380px]">
     //     <Image

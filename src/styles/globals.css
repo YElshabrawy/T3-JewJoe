@@ -23,6 +23,19 @@
   .divider {
     @apply my-5 border-t border-my_gray;
   }
+  .prym-btn {
+    @apply my-auto cursor-pointer whitespace-nowrap rounded-md border border-black py-2 text-center text-Bl hover:bg-black hover:text-white;
+  }
+}
+
+@layer utilities {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"] {
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield !important;
+  }
 }
 
 @responsive {
