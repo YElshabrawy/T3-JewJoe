@@ -13,8 +13,11 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 // Utils
 import cn from "../utils/cn";
+// Next Auth
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const NavBar = ({ withoutSearch = false }) => {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const currentPage = "/" + router.route.split("/")[1];
@@ -61,6 +64,15 @@ const NavBar = ({ withoutSearch = false }) => {
         {/* Nav Items */}
         <div className="flex flex-col items-center justify-center md:flex md:flex-row">
           {navItems}
+          {session ? (
+            <button className="prym-btn px-6" onClick={() => signOut()}>
+              Sign out
+            </button>
+          ) : (
+            <button className="prym-btn px-6" onClick={() => signIn()}>
+              Sign in
+            </button>
+          )}
         </div>
         {/* Desktop Icons */}
         <div className="hidden md:flex">
