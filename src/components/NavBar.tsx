@@ -69,9 +69,14 @@ const NavBar = ({ withoutSearch = false }) => {
               Sign out
             </button>
           ) : (
-            <button className="prym-btn px-6" onClick={() => signIn()}>
-              Sign in
-            </button>
+            <>
+              <button className="prym-btn px-6" onClick={() => signIn()}>
+                Sign in
+              </button>
+              <Link href="/auth/register" className="prym-btn px-6">
+                Sign up
+              </Link>
+            </>
           )}
         </div>
         {/* Desktop Icons */}
