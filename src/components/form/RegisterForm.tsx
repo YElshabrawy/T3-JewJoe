@@ -11,11 +11,14 @@ export default function Login() {
   // const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const createUserMutation = api.user.createUser.useMutation({
     onError: (e) => setErrMsg(e.message),
-    onSuccess: () => router.push("/auth/login"),
+    onSuccess: () => router.push("/api/auth/signin"),
   });
 
   // Formik
   interface MyFormValues {
+    firstname: string;
+    lastname: string;
+    phone?: string;
     username: string;
     email: string;
     password: string;
@@ -26,40 +29,38 @@ export default function Login() {
     password: "",
     username: "",
     confirmPassword: "",
+    firstname: "",
+    lastname: "",
   };
 
   async function handleSubmitRegister(values: MyFormValues) {
-    // console.log("vals", values);
+    const { firstname, lastname, username, email, password, confirmPassword } =
+      values;
     // Check if pw match
-    if (values.password !== values.confirmPassword) {
+    if (password !== confirmPassword) {
       // Throw an error
       const msg = "Passwords Does not Match";
       setErrMsg(msg);
       throw new Error(msg);
     }
     await createUserMutation.mutateAsync({
-      email: values.email,
-      name: values.username,
-      password: values.password,
+      email,
+      username,
+      firstname,
+      lastname,
+      password,
     });
-    // console.log("user", u);
-    // if (!u) {
-    //   const msg = "Internal Server Error";
-    //   setErrMsg(msg);
-    //   throw new Error(msg);
-    // }
-    // void router.push("/auth/login");
   }
   return (
     <>
-      <main className="w-full rounded-lg bg-white shadow dark:border dark:border-gray-700 dark:bg-gray-800 sm:max-w-md md:mt-0 xl:p-0">
+      <main className="mx-auto w-full rounded-lg bg-white shadow  sm:max-w-md md:mt-0 xl:p-0">
         <div className=" p-6 sm:p-8 ">
-          <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl">
-            JoeDev - Register
+          <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900  md:text-2xl">
+            JewJoe - Register
           </h1>
           {errMsg && (
             <div
-              className="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700 dark:bg-gray-800 dark:text-red-400"
+              className="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700 "
               role="alert"
             >
               <span className="font-medium">Error!</span> {errMsg}
@@ -67,16 +68,40 @@ export default function Login() {
           )}
           <Formik initialValues={initialValues} onSubmit={handleSubmitRegister}>
             <Form className="space-y-4 md:space-y-4">
+              {/* Firstname */}
+              <label className="my-label" htmlFor="firstname">
+                First Name
+              </label>
+              <Field
+                id="firstname"
+                name="firstname"
+                type="text"
+                placeholder="firstname"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary sm:text-sm"
+              />
+              {/* Lasttname */}
+              <label className="my-label" htmlFor="lastname">
+                Last Name
+              </label>
+              <Field
+                id="lastname"
+                name="lastname"
+                type="text"
+                placeholder="lastname"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary   sm:text-sm"
+              />
+              {/* Username */}
               <label className="my-label" htmlFor="username">
-                Full Name
+                Username
               </label>
               <Field
                 id="username"
                 name="username"
                 type="text"
                 placeholder="username"
-                className="focus:border-primary-600 focus:ring-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary   sm:text-sm"
               />
+              {/* Email */}
               <label className="my-label" htmlFor="email">
                 Email
               </label>
@@ -85,9 +110,9 @@ export default function Login() {
                 name="email"
                 type="email"
                 placeholder="test@test.com"
-                className="focus:border-primary-600 focus:ring-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary   sm:text-sm"
               />
-
+              {/* Password */}
               <label className="my-label" htmlFor="password">
                 Password
               </label>
@@ -96,8 +121,9 @@ export default function Login() {
                 name="password"
                 type="password"
                 placeholder="Enter Password"
-                className="focus:border-primary-600 focus:ring-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary   sm:text-sm"
               />
+              {/* Confirm Password */}
               <label className="my-label" htmlFor="confirmPassword">
                 Confirm Password
               </label>
@@ -106,11 +132,11 @@ export default function Login() {
                 name="confirmPassword"
                 type="password"
                 placeholder="Confirm Password"
-                className="focus:border-primary-600 focus:ring-primary-600 block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary   sm:text-sm"
               />
               <button
                 type="submit"
-                className="bg-primary-600 hover:bg-primary-700 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4"
+                className="w-full rounded-lg bg-primary px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-primary_hover focus:outline-none focus:ring-4 focus:ring-primary_focus"
               >
                 Register
               </button>

@@ -9,6 +9,9 @@ module.exports = {
         my_gray: "#D8D8D8",
         my_lightGray: "#EFEFEF",
         my_errors: "#D82700",
+        primary: "#A18A68",
+        primary_hover: "#B39E82",
+        primary_focus: "#D6C7B7",
       },
       fontSize: {
         h1: [
