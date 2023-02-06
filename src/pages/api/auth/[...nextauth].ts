@@ -1,11 +1,11 @@
-import type { NextAuthOptions } from "next-auth";
+import type { Awaitable, NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "../../../server/db/client";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { Session } from "inspector";
 
 export const authOptions: NextAuthOptions = {
-  // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   providers: [
@@ -25,15 +25,33 @@ export const authOptions: NextAuthOptions = {
         // Validate password
         const isValidPassword = user.password == credentials?.password;
         if (!isValidPassword) return null;
+
+        const userCart = await prisma.cart.findFirst({
+          where: { user_id: user.id },
+        });
         return {
           id: user.id,
-          email: user.email,
-          username: user.username,
-          firstname: user.firstname,
+          cartId: userCart?.id,
         };
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.cartId = token.cartId;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id;
+        session.user.cartId = token.cartId;
+      }
+      return session;
+    },
+  },
 };
 
 export default NextAuth(authOptions);

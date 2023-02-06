@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -12,9 +13,18 @@ const ASSETS_DIR = "/assets/products";
 
 const ProductPage: NextPage = () => {
   const router = useRouter();
+  const { data: session } = useSession();
   const productId = router.query.id as string;
   const [qty, setQty] = useState(1);
   const [imgisLoading, setimgLoading] = useState(true);
+
+  const handleAddToCart = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (!session) console.log("no session");
+    console.log("session.user", session?.user);
+  };
 
   const incrementQty = () => {
     if (product?.quantity && qty + 1 <= product?.quantity) setQty(qty + 1);
@@ -27,6 +37,7 @@ const ProductPage: NextPage = () => {
     id: productId,
   });
   if (isLoading) return <LoadingSpinner />;
+
   return (
     <>
       <Head>
@@ -88,7 +99,9 @@ const ProductPage: NextPage = () => {
                 </button>
               </div>
               {/* Add to cart */}
-              <div className="prym-btn px-20">ADD TO CART</div>
+              <button onClick={handleAddToCart} className="prym-btn px-20">
+                ADD TO CART
+              </button>
             </div>
             {/* Icons */}
             <div className="group flex w-fit text-my_darkGray">
