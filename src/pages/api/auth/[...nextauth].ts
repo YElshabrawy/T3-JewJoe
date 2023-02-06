@@ -29,8 +29,11 @@ export const authOptions: NextAuthOptions = {
         const userCart = await prisma.cart.findFirst({
           where: { user_id: user.id },
         });
+        // console.log("[CART]", userCart);
+        // if (!userCart) return null;
         return {
           id: user.id,
+          email: user.email,
           cartId: userCart?.id,
         };
       },
@@ -40,7 +43,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.cartId = token.cartId;
+        token.cartId = user.cartId;
       }
       return token;
     },

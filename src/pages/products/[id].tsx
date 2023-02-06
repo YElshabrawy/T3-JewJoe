@@ -18,12 +18,21 @@ const ProductPage: NextPage = () => {
   const [qty, setQty] = useState(1);
   const [imgisLoading, setimgLoading] = useState(true);
 
-  const handleAddToCart = (
+  const handleAddToCart = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    if (!session) console.log("no session");
-    console.log("session.user", session?.user);
+    if (!session) router.push("/api/auth/signin");
+    if (!session?.user) return;
+    if (!session?.user?.cartId) console.log("No cart"); // [to.do] create cart
+
+    // create new cart item with the current product id and session user id
+    const result = await createCartMutation.mutateAsync({
+      cart_id: session?.user.cartId as string,
+      product_id: product?.id as string,
+      quantity: qty,
+    });
+    console.log(result);
   };
 
   const incrementQty = () => {
@@ -32,7 +41,8 @@ const ProductPage: NextPage = () => {
   const decrementQty = () => {
     if (qty - 1 >= 0) setQty(qty - 1);
   };
-
+  // trpc
+  const createCartMutation = trpc.cart.createCartItem.useMutation();
   const { data: product, isLoading } = trpc.product.getProductByID.useQuery({
     id: productId,
   });
