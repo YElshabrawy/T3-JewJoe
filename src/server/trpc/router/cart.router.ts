@@ -1,3 +1,4 @@
+import type { cart_item } from "@prisma/client";
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 
@@ -19,10 +20,39 @@ export const cartRouter = router({
             cart_id: input.cart_id,
           },
         });
+        // if quantity = 0 remove
+        if (!existingCartItem && input.quantity == 0) return;
+        if (
+          existingCartItem?.quantity == 0 ||
+          (existingCartItem && input.quantity == 0)
+        ) {
+          await ctx.prisma.cart_item.delete({
+            where: {
+              cart_id_product_id: {
+                cart_id: existingCartItem.cart_id,
+                product_id: existingCartItem.product_id,
+              },
+            },
+          });
+          return;
+        }
+        let result: cart_item;
         if (existingCartItem) {
           // just update its quantity
+          result = await ctx.prisma.cart_item.update({
+            where: {
+              cart_id_product_id: {
+                cart_id: existingCartItem.cart_id,
+                product_id: existingCartItem.product_id,
+              },
+            },
+            data: {
+              quantity: input.quantity,
+            },
+          });
         } else {
-          const result = await ctx.prisma.cart_item.create({
+          //create
+          result = await ctx.prisma.cart_item.create({
             data: {
               cart_id: input.cart_id,
               product_id: input.product_id,
