@@ -8,6 +8,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import RatingStarts from "../../components/RatingStarts";
 import cn from "../../utils/cn";
 import { trpc } from "../../utils/trpc";
+import { prisma } from "../../server/db/client";
 
 const ASSETS_DIR = "/assets/products";
 
@@ -26,6 +27,13 @@ const ProductPage: NextPage = () => {
     if (!session?.user) return;
     if (!session?.user?.cartId) console.log("No cart"); // [to.do] create cart
 
+    // check if same product exists update its quantity
+    const existingCart = await prisma.cart_item.findFirst({
+      where: {
+        product_id: product?.id,
+        cart_id: session?.user.cartId,
+      },
+    });
     // create new cart item with the current product id and session user id
     const result = await createCartMutation.mutateAsync({
       cart_id: session?.user.cartId as string,

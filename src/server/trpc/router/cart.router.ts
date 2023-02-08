@@ -12,13 +12,24 @@ export const cartRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const result = await ctx.prisma.cart_item.create({
-          data: {
-            cart_id: input.cart_id,
+        // check if cart already exists and just update its value if so
+        const existingCartItem = await ctx.prisma.cart_item.findFirst({
+          where: {
             product_id: input.product_id,
-            quantity: input.quantity,
+            cart_id: input.cart_id,
           },
         });
+        if (existingCartItem) {
+          // just update its quantity
+        } else {
+          const result = await ctx.prisma.cart_item.create({
+            data: {
+              cart_id: input.cart_id,
+              product_id: input.product_id,
+              quantity: input.quantity,
+            },
+          });
+        }
         return {
           status: 201,
           message: "Cart Item created successfully",
