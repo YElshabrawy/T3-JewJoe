@@ -1,4 +1,4 @@
-import type { cart_item } from "@prisma/client";
+import type { cart_item, product } from "@prisma/client";
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 
@@ -67,6 +67,29 @@ export const cartRouter = router({
         };
       } catch (error) {
         console.log("error", error);
+      }
+    }),
+  getCartItems: publicProcedure
+    .input(
+      z.object({
+        cart_id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const ids: string[] = [];
+        const imm: cart_item[] = await ctx.prisma.cart_item.findMany({
+          where: { cart_id: input.cart_id },
+        });
+        imm.map((item) => {
+          ids.push(item.product_id);
+        });
+        const result = await ctx.prisma.product.findMany({
+          where: { id: { in: ids } },
+        });
+        return result;
+      } catch (err) {
+        console.log(err);
       }
     }),
 });

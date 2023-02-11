@@ -51,9 +51,9 @@ const NavBar = ({ withoutSearch = false }) => {
         {/* Right Hand Side */}
         <div className="-mr-2 flex items-center md:hidden">
           {/* Cart */}
-          <button className="mr-4 text-3xl text-black">
+          <Link href="cart" className="mr-4 text-3xl text-black">
             <CartIcon items={2} />
-          </button>
+          </Link>
 
           {/* Hamburger */}
           <Hamburger size={20} rounded toggled={isOpen} toggle={setIsOpen} />
@@ -80,13 +80,13 @@ const NavBar = ({ withoutSearch = false }) => {
           )}
         </div>
         {/* Desktop Icons */}
-        <div className="hidden md:flex">
+        <div className="hidden items-center md:flex">
           <button className="ml-12 w-4">
             <SearchIcon />
           </button>
-          <button className="ml-10 text-3xl">
+          <Link href="cart" className="ml-10 text-3xl">
             <CartIcon items={2} />
-          </button>
+          </Link>
           <button className="ml-10 w-5 text-3xl">
             <ProfileIcon />
           </button>

@@ -25,7 +25,7 @@ const CartIcon = ({ items = 0 }) => {
       </svg>
       {items > 0 ? (
         <div className="absolute -top-5 -right-5 h-12 w-12 scale-[0.3] rounded-full border-[3px] border-black bg-white p-1 font-bold">
-          {items}
+          <p className="text-center">{items}</p>
         </div>
       ) : null}
     </div>
