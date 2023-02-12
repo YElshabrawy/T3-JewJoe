@@ -9,7 +9,7 @@ const CURRENCY = "usd";
 const MIN_AMOUNT = 10.0;
 const MAX_AMOUNT = 5000.0;
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(env.NEXT_PUBLIC_STRIPE_SECRET_KEY, {
   apiVersion: "2022-11-15",
 });
 

@@ -3,12 +3,45 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import CartItem from "../../components/CartItem";
 import { trpc } from "../../utils/trpc";
+import Stripe from "stripe";
+import { env } from "../../env/client.mjs";
+
+const stripe = new Stripe(env.NEXT_PUBLIC_STRIPE_SECRET_KEY, {
+  apiVersion: "2022-11-15",
+});
 
 const CartPage: NextPage = () => {
   const { data: session } = useSession();
   const { data: cartItems } = trpc.cart.getCartItems.useQuery({
     cart_id: session?.user?.cartId || "",
   });
+
+  const handleCheckoutSubmit = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+    // create stripe products
+    cartItems?.map(async (item) => {
+      const product = await stripe?.products.create({
+        name: item.name,
+        active: true,
+        images: [item.image || ""],
+        description: item.description || "Unknown",
+      });
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: item.price * 100,
+        currency: "usd",
+      });
+      const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
+        price: price.id,
+        quantity: item.quantity,
+      };
+      lineItems.push(lineItem);
+    });
+    console.log("lineItems", lineItems);
+  };
 
   return (
     <>
@@ -28,9 +61,7 @@ const CartPage: NextPage = () => {
           </div>
           {/* checkout details */}
           <form action="/api/checkout_sessions" method="POST">
-            <button type="submit" role="link">
-              Checkout
-            </button>
+            <button onClick={handleCheckoutSubmit}>Checkout</button>
           </form>
         </div>
         {/* <div className="mx-auto w-full px-4">
