@@ -40,7 +40,14 @@ const CartPage: NextPage = () => {
       };
       lineItems.push(lineItem);
     });
-    console.log("lineItems", lineItems);
+    fetch("/api/checkout_sessions", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ lineItems: lineItems }),
+    });
   };
 
   return (

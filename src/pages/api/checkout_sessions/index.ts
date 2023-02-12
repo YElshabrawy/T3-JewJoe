@@ -19,6 +19,8 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const amount: number = req.body.amount;
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      req.body.lineItems;
     try {
       // Validate the amount that was passed from the client.
       if (!(amount >= MIN_AMOUNT && amount <= MAX_AMOUNT)) {
@@ -28,12 +30,7 @@ export default async function handler(
       const params: Stripe.Checkout.SessionCreateParams = {
         mode: "payment",
         payment_method_types: ["card"],
-        line_items: [
-          {
-            price: String(formatAmountForStripe(amount, CURRENCY)),
-            quantity: 1,
-          },
-        ],
+        line_items: lineItems,
         success_url: `${req.headers.origin}/result?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin}/donate-with-checkout`,
       };
