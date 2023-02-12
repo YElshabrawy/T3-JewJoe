@@ -7,6 +7,7 @@ import { z } from "zod";
  */
 export const serverSchema = z.object({
   DATABASE_URL: z.string().url(),
+  STRIPE_SECRET_KEY: z.string(),
   NODE_ENV: z.enum(["development", "test", "production"]),
 });
 
@@ -18,6 +19,7 @@ export const serverSchema = z.object({
 export const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string(),
   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: z.string(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
 });
 
 /**
@@ -30,4 +32,6 @@ export const clientEnv = {
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY:
     process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
 };
