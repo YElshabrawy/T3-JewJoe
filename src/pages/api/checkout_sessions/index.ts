@@ -4,6 +4,7 @@ import { formatAmountForStripe } from "../../../utils/stripe";
 
 import Stripe from "stripe";
 import { env } from "../../../env/server.mjs";
+import { product } from "@prisma/client";
 
 const CURRENCY = "usd";
 const MIN_AMOUNT = 10.0;
@@ -18,22 +19,36 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const amount: number = req.body.amount;
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
-      req.body.lineItems;
+    // const amount: number = req.body.amount;
+    const items: product[] = req.body.items;
+    console.log("kkk", items);
+    const transformedItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      items?.map((item) => ({
+        price_data: {
+          currency: "usd",
+          unit_amount: Math.floor(item.price) * 100,
+          product_data: {
+            name: item.name,
+            description: item.description || "No description",
+            images: [item.image || ""],
+          },
+        },
+        quantity: item.quantity,
+      }));
     try {
       // Validate the amount that was passed from the client.
-      if (!(amount >= MIN_AMOUNT && amount <= MAX_AMOUNT)) {
-        throw new Error("Invalid amount.");
-      }
+      // if (!(amount >= MIN_AMOUNT && amount <= MAX_AMOUNT)) {
+      //   throw new Error("Invalid amount.");
+      // }
       // Create Checkout Sessions from body params.
       const params: Stripe.Checkout.SessionCreateParams = {
         mode: "payment",
         payment_method_types: ["card"],
-        line_items: lineItems,
+        line_items: transformedItems,
         success_url: `${req.headers.origin}/result?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.headers.origin}/donate-with-checkout`,
       };
+
       const checkoutSession: Stripe.Checkout.Session =
         await stripe.checkout.sessions.create(params);
 

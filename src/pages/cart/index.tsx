@@ -3,12 +3,8 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import CartItem from "../../components/CartItem";
 import { trpc } from "../../utils/trpc";
-import Stripe from "stripe";
-import { env } from "../../env/client.mjs";
-
-const stripe = new Stripe(env.NEXT_PUBLIC_STRIPE_SECRET_KEY, {
-  apiVersion: "2022-11-15",
-});
+import getStripe from "../../utils/stripe";
+import axios from "axios";
 
 const CartPage: NextPage = () => {
   const { data: session } = useSession();
@@ -16,38 +12,21 @@ const CartPage: NextPage = () => {
     cart_id: session?.user?.cartId || "",
   });
 
-  const handleCheckoutSubmit = (
+  const handleCheckoutSubmit = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-    // create stripe products
-    cartItems?.map(async (item) => {
-      const product = await stripe?.products.create({
-        name: item.name,
-        active: true,
-        images: [item.image || ""],
-        description: item.description || "Unknown",
-      });
-      const price = await stripe.prices.create({
-        product: product.id,
-        unit_amount: item.price * 100,
-        currency: "usd",
-      });
-      const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
-        price: price.id,
-        quantity: item.quantity,
-      };
-      lineItems.push(lineItem);
+    const stripe = await getStripe();
+
+    const checkoutSession = await axios.post("/api/checkout_sessions", {
+      items: cartItems,
     });
-    fetch("/api/checkout_sessions", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ lineItems: lineItems }),
+
+    const result = await stripe?.redirectToCheckout({
+      sessionId: checkoutSession.data.id,
     });
+
+    if (result?.error) alert(result.error.message);
   };
 
   return (
