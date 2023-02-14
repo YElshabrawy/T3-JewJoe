@@ -52,6 +52,7 @@ model user {
   phone     String? @unique
   is_admin  Boolean @default(false)
   cart      cart?
+  orders    order[]
   // review       review[]
   // shop_order shop_order[]
   // user_address user_address[]
@@ -59,23 +60,39 @@ model user {
 }
 
 model cart {
-  id        String      @id @default(uuid())
-  user_id   String      @unique
-  cart_item cart_item[]
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  user      user?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id   String?  @unique
 
-  user user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  items cart_item[]
+
+  @@index([user_id])
 }
 
 model cart_item {
-  id         String @default(uuid())
-  cart_id    String
+  id         String  @id @default(cuid())
+  product    product @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id String
   quantity   Int
 
-  cart    cart    @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product product @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cart    cart   @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cart_id String
 
-  @@id([cart_id, product_id])
+  @@index([product_id])
+  @@index([cart_id])
+}
+
+model order {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  user         user?    @relation(fields: [userId], references: [id])
+  userId       String?
+  status       String
+  totalAmount  Int
+  customerNote String
+
+  @@index([userId])
 }
 
 // model order_line {
